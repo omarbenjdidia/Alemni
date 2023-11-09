@@ -1,0 +1,44 @@
+
+GET http://localhost:3000/product/getproduct
+
+###
+POST http://localhost:3000/product/addproduct
+Content-Type: application/json
+
+{
+  "title": "Web1998",
+  "description": "hallo",
+  "pricing": 5.0,
+  "rating": 4.2,
+  "duration": 1.0,
+  "number_of_episodes": 3,
+  "image": "image"
+}
+
+###
+DELETE  http://localhost:3000/product/deleteproduct/Web1998
+Content-Type: application/json
+
+{
+  "title": "Web",
+  "description": "hallo",
+  "pricing": 5.0,
+  "rating": 4.2,
+  "duration": 1.0,
+  "number_of_episodes": 3,
+  "image": "image"
+}
+
+###
+PUT  http://localhost:3000/product/modifyproduct/Web1998
+Content-Type: application/json
+
+{
+  "title": "weboooooooooooooooooo",
+  "description": "hallo",
+  "pricing": 5.0,
+  "rating": 4.2,
+  "duration": 1.0,
+  "number_of_episodes": 3,
+  "image": "image"
+}

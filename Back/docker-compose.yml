@@ -1,0 +1,27 @@
+version: "3"
+services: 
+  web:
+   build: .
+   environment: 
+    - NODE_END=production
+   ports: 
+    - "3000:3000"
+   networks: 
+    - econstat
+   depends_on: 
+    - mongo 
+   volumes: 
+    - media:/public/
+  mongo: 
+   image: mongo 
+   ports: 
+    - "27017:27017" 
+   volumes: 
+    - econstat:/db
+   networks: 
+    - econstat
+volumes:
+ econstat:
+ media: 
+networks: 
+ econstat:
