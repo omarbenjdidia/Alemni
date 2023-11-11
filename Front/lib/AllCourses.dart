@@ -46,7 +46,7 @@ Row(
        child: Text('Course List',style: TextStyle(fontWeight: FontWeight.bold,fontSize: 21),))
   ],
 ),
-             SizedBox(height: 45,),
+             SizedBox(height:   45,),
              Row(
                crossAxisAlignment: CrossAxisAlignment.end,
                mainAxisAlignment: MainAxisAlignment.start,

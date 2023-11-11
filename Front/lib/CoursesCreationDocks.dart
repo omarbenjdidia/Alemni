@@ -1,3 +1,4 @@
+import 'package:e_learning/HomeScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 
@@ -88,7 +89,7 @@ class _CoursesCreationDocksState extends State<CoursesCreationDocks> {
               child: ElevatedButton(
                 onPressed: () {
                   // Navigate back to the Courses screen when Finish is pressed
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Courses()));
+                  Navigator.popUntil(context, ModalRoute.withName('/')); // Pop until reaching the root route
                 },
                 style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(
