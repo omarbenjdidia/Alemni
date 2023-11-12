@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'CoursesCreation.dart'; // Import the CoursesCreation class
+import 'CoursesCreation.dart';
 
 class Courses extends StatefulWidget {
   const Courses({Key? key}) : super(key: key);
@@ -18,76 +18,80 @@ class _CoursesState extends State<Courses> {
         backgroundColor: Colors.blue.shade800,
         title: Text('Courses'),
       ),
-      body: Container(
-        padding: EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            GestureDetector(
-              onTap: () async {
-                CourseDetails? result = await Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => CoursesCreation()),
-                );
+      body: SingleChildScrollView(
+        child: Container(
+          padding: EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              GestureDetector(
+                onTap: () async {
+                  CourseDetails? result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => CoursesCreation()),
+                  );
 
-                if (result != null) {
-                  setState(() {
-                    _courseList.add(result);
-                  });
-                }
-              },
-              child: SizedBox(
-                height: 74,
-                child: Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  color: Colors.blue.shade800,
-                  child: Center(
-                    child: Text(
-                      'Add Courses',
-                      style: TextStyle(
-                        fontSize: 19,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w500,
+                  if (result != null) {
+                    setState(() {
+                      _courseList.add(result);
+                    });
+                  }
+                },
+                child: SizedBox(
+                  height: 74,
+                  child: Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    color: Colors.blue.shade800,
+                    child: Center(
+                      child: Text(
+                        'Add Courses',
+                        style: TextStyle(
+                          fontSize: 19,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => Package(_courseList)),
-                );
-              },
-              child: Text(
-                'Make Package',
-                style: TextStyle(
-                  fontSize: 19,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => Package(_courseList)),
+                  );
+                },
+                child: Text(
+                  'Make Package',
+                  style: TextStyle(
+                    fontSize: 19,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.blue.shade800,
+                  padding: EdgeInsets.symmetric(vertical: 20),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
               ),
-              style: ElevatedButton.styleFrom(
-                primary: Colors.blue.shade800,
-                padding: EdgeInsets.symmetric(vertical: 20),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
+              SizedBox(height: 20),
+              ListView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemCount: _courseList.length,
+                itemBuilder: (context, index) {
+                  return buildCourseCard(_courseList[index]);
+                },
               ),
-            ),
-            SizedBox(height: 20),
-            if (_courseList.isNotEmpty)
-              Column(
-                children: _courseList.map((course) {
-                  return buildCourseCard(course);
-                }).toList(),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -190,49 +194,51 @@ class _PackageState extends State<Package> {
         backgroundColor: Colors.blue.shade800,
         title: Text('Package'),
       ),
-      body: Container(
-        padding: EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Courses in the Package:',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 10),
-            if (widget.courseList.isNotEmpty)
-              Column(
-                children: List.generate(widget.courseList.length, (index) {
-                  return buildCourseCard(widget.courseList[index], index);
-                }),
-              ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                // Call the navigation function when the button is pressed
-                navigateToPackageResult();
-              },
-              child: Text(
-                'Create Package',
+      body: SingleChildScrollView(
+        child: Container(
+          padding: EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Courses in the Package:',
                 style: TextStyle(
-                  fontSize: 19,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              style: ElevatedButton.styleFrom(
-                primary: Colors.blue.shade800,
-                padding: EdgeInsets.symmetric(vertical: 20),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+              SizedBox(height: 10),
+              if (widget.courseList.isNotEmpty)
+                Column(
+                  children: List.generate(widget.courseList.length, (index) {
+                    return buildCourseCard(widget.courseList[index], index);
+                  }),
+                ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  // Call the navigation function when the button is pressed
+                  navigateToPackageResult();
+                },
+                child: Text(
+                  'Create Package',
+                  style: TextStyle(
+                    fontSize: 19,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.blue.shade800,
+                  padding: EdgeInsets.symmetric(vertical: 20),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
               ),
-            ),
-            SizedBox(height: 20),
-          ],
+              SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
     );
