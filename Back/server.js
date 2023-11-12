@@ -5,6 +5,7 @@ import cors from 'cors';
 import multer from 'multer'; // Import Multer
 import UserRoute from './Routes/User.route.js';
 import productRoute from './Routes/product.route.js';
+import packageRoute from './Routes/package.route.js';
 import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import './auth/auth.js';
@@ -50,7 +51,7 @@ const options = {
             }
         ]
     },
-    apis: ['./Routes/User.route.js', './Routes/product.route.js'],
+    apis: ['./Routes/User.route.js', './Routes/product.route.js','./Routes/package.route.js' ],
 }
 
 const swaggerSpec = swaggerJSDoc(options);
@@ -64,6 +65,8 @@ const upload = multer({ storage: storage });
 
 app.use("/user", UserRoute);
 app.use("/product", productRoute);
+app.use("/package", packageRoute);
+
 
 // Pour les images
 app.use(express.urlencoded({ extended: true }));
