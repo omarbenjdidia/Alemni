@@ -1,6 +1,8 @@
-import 'package:flutter/material.dart';
+// Package.dart
 
+import 'package:flutter/material.dart';
 import 'CoursesCreation.dart';
+import 'Search.dart'; // Import the Search class
 
 class Package extends StatelessWidget {
   final List<CourseDetails> courseList;
@@ -35,9 +37,13 @@ class Package extends StatelessWidget {
               ),
             SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () {
-                // Implement your logic for making a package with selected courses
-              },
+        onPressed: () {
+  // Implement your logic for making a package with selected courses
+  
+  // Navigate back to the previous screen
+  Navigator.pop(context);
+},
+
               child: Text(
                 'Create Package',
                 style: TextStyle(

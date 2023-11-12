@@ -146,10 +146,24 @@ class _CoursesState extends State<Courses> {
   }
 }
 
-class Package extends StatelessWidget {
+class Package extends StatefulWidget {
   final List<CourseDetails> courseList;
 
   Package(this.courseList);
+
+  @override
+  _PackageState createState() => _PackageState();
+}
+
+class _PackageState extends State<Package> {
+  late List<bool> selectedCourses;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize the selectedCourses list with false values for each course
+    selectedCourses = List<bool>.filled(widget.courseList.length, false);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -171,16 +185,25 @@ class Package extends StatelessWidget {
               ),
             ),
             SizedBox(height: 10),
-            if (courseList.isNotEmpty)
+            if (widget.courseList.isNotEmpty)
               Column(
-                children: courseList.map((course) {
-                  return buildCourseCard(course);
-                }).toList(),
+                children: List.generate(widget.courseList.length, (index) {
+                  return buildCourseCard(widget.courseList[index], index);
+                }),
               ),
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 // Implement your logic for making a package with selected courses
+                List<CourseDetails> selectedCoursesList = [];
+
+                for (int i = 0; i < widget.courseList.length; i++) {
+                  if (selectedCourses[i]) {
+                    selectedCoursesList.add(widget.courseList[i]);
+                  }
+                }
+
+                // Now selectedCoursesList contains the selected courses
               },
               child: Text(
                 'Create Package',
@@ -204,40 +227,51 @@ class Package extends StatelessWidget {
     );
   }
 
-  Widget buildCourseCard(CourseDetails course) {
-    return Card(
-      margin: EdgeInsets.only(top: 20),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
-      ),
-      elevation: 5,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (course.image != null)
-              Image.file(
-                course.image,
-                height: 100,
-                width: 100,
-                fit: BoxFit.cover,
+  Widget buildCourseCard(CourseDetails course, int index) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          selectedCourses[index] = !selectedCourses[index];
+        });
+      },
+      child: Card(
+        margin: EdgeInsets.only(top: 20),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+          side: BorderSide(
+            color: selectedCourses[index] ? Colors.blue : Colors.transparent,
+            width: 2.0,
+          ),
+        ),
+        elevation: 5,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (course.image != null)
+                Image.file(
+                  course.image,
+                  height: 100,
+                  width: 100,
+                  fit: BoxFit.cover,
+                ),
+              SizedBox(height: 10),
+              Text(
+                'Course Details:',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            SizedBox(height: 10),
-            Text(
-              'Course Details:',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text('Title: ${course.title}', style: TextStyle(fontSize: 16)),
-            Text('Description: ${course.description}', style: TextStyle(fontSize: 16)),
-            Text('Price: ${course.price}', style: TextStyle(fontSize: 16)),
-            Text('Estimated Course Time: ${course.time} hours', style: TextStyle(fontSize: 16)),
-            if (course.pdfFile.path.isNotEmpty)
-              Text('Selected PDF: ${course.pdfFile.path}', style: TextStyle(fontSize: 16)),
-          ],
+              Text('Title: ${course.title}', style: TextStyle(fontSize: 16)),
+              Text('Description: ${course.description}', style: TextStyle(fontSize: 16)),
+              Text('Price: ${course.price}', style: TextStyle(fontSize: 16)),
+              Text('Estimated Course Time: ${course.time} hours', style: TextStyle(fontSize: 16)),
+              if (course.pdfFile.path.isNotEmpty)
+                Text('Selected PDF: ${course.pdfFile.path}', style: TextStyle(fontSize: 16)),
+            ],
+          ),
         ),
       ),
     );
