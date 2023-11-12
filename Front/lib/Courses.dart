@@ -157,12 +157,30 @@ class Package extends StatefulWidget {
 
 class _PackageState extends State<Package> {
   late List<bool> selectedCourses;
+  List<String> _selectedTitles = [];
 
   @override
   void initState() {
     super.initState();
     // Initialize the selectedCourses list with false values for each course
     selectedCourses = List<bool>.filled(widget.courseList.length, false);
+  }
+
+  // Function to handle navigation to the PackageResult screen
+  void navigateToPackageResult() {
+    // Get the titles of selected courses
+    List<String> selectedTitles = [];
+    for (int i = 0; i < widget.courseList.length; i++) {
+      if (selectedCourses[i]) {
+        selectedTitles.add(widget.courseList[i].title);
+      }
+    }
+
+    // Navigate to the PackageResult screen and pass the selected titles
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => PackageResult(selectedTitles)),
+    );
   }
 
   @override
@@ -194,16 +212,8 @@ class _PackageState extends State<Package> {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                // Implement your logic for making a package with selected courses
-                List<CourseDetails> selectedCoursesList = [];
-
-                for (int i = 0; i < widget.courseList.length; i++) {
-                  if (selectedCourses[i]) {
-                    selectedCoursesList.add(widget.courseList[i]);
-                  }
-                }
-
-                // Now selectedCoursesList contains the selected courses
+                // Call the navigation function when the button is pressed
+                navigateToPackageResult();
               },
               child: Text(
                 'Create Package',
@@ -221,6 +231,7 @@ class _PackageState extends State<Package> {
                 ),
               ),
             ),
+            SizedBox(height: 20),
           ],
         ),
       ),
@@ -233,6 +244,9 @@ class _PackageState extends State<Package> {
         setState(() {
           selectedCourses[index] = !selectedCourses[index];
         });
+
+        // When a course is selected, update the selected titles
+        updateSelectedTitles();
       },
       child: Card(
         margin: EdgeInsets.only(top: 20),
@@ -270,8 +284,73 @@ class _PackageState extends State<Package> {
               Text('Estimated Course Time: ${course.time} hours', style: TextStyle(fontSize: 16)),
               if (course.pdfFile.path.isNotEmpty)
                 Text('Selected PDF: ${course.pdfFile.path}', style: TextStyle(fontSize: 16)),
+              // Dynamically display or hide the selected title
+              if (selectedCourses[index])
+                Text(
+                  'Selected: ${course.title}',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  // Function to update the selected titles
+  void updateSelectedTitles() {
+    _selectedTitles = [];
+    for (int i = 0; i < widget.courseList.length; i++) {
+      if (selectedCourses[i]) {
+        _selectedTitles.add(widget.courseList[i].title);
+      }
+    }
+  }
+}
+
+class PackageResult extends StatelessWidget {
+  final List<String> selectedTitles;
+
+  PackageResult(this.selectedTitles);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.blue.shade800,
+        title: Text('Package Result'),
+      ),
+      body: Container(
+        padding: EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Card(
+              elevation: 5,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Selected Courses:',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    // Display selected titles in a list
+                    for (String title in selectedTitles)
+                      Text(
+                        title,
+                        style: TextStyle(fontSize: 16),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
