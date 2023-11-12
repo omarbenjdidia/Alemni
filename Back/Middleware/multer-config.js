@@ -1,36 +1,53 @@
-import multer, { diskStorage } from "multer"; // Importer multer
+import multer, { diskStorage } from "multer";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
-
-
-
-// Les extensions & accepter
+import fs from "fs";
 
 const MIME_TYPES = {
     "image/jpg": "jpg",
     "image/jpeg": "jpg",
     "image/png": "png",
+    "application/pdf": "pdf",
+};
 
+const currentFileUrl = import.meta.url;
+const currentFilePath = fileURLToPath(currentFileUrl);
+const currentDir = dirname(currentFilePath);
+
+const destinationPath = join(currentDir, "../public/carIcons");
+
+// Create the destination directory if it doesn't exist
+try {
+    fs.accessSync(destinationPath);
+} catch (error) {
+    fs.mkdirSync(destinationPath, { recursive: true });
+}
+
+const storage = diskStorage({
+    destination: (req, file, callback) => {
+        callback(null, destinationPath);
+    },
+    filename: (req, file, callback) => {
+        const name = file.originalname.split(" ").join("");
+        const extension = MIME_TYPES[file.mimetype] || "unknown";
+        callback(null, name + Date.now() + "." + extension);
+    },
+});
+
+const fileFilter = (req, file, callback) => {
+    const allowedMimes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+
+    if (allowedMimes.includes(file.mimetype)) {
+        callback(null, true);
+    } else {
+        callback(new Error('Invalid file type. Only JPEG, JPG, PNG, and PDF are allowed.'));
+    }
 };
 
 export default multer({
-    //Configuration de stockage
-    storage: diskStorage({
-        //Configurer 1'enplacenent de stockage
-        destination: (req, file, callback) => {
-            const __dirname = dirname(fileURLToPath(import.meta.url)); // Récupérer le chemain du dossier courant|
-            callback(null, join(__dirname, "../public/carIcons")); // Indiquer 1'emplacement de stockage
-        },
-        //Configurer 1e nom avec lequel le fichier va etre enregistrer
-        filename: (req, file, callback) => {
-            //Reaplacer les espaces par des underscores
-            const name = file.originalname.split(" ").join("");
-            //Récupérer l"extension a utiliser pour le fichier
-            const extension = MIME_TYPES[file.mimetype];
-            // Ajouter un timestamp Date.now() au nom de fichier
-            callback(null, name + Date.now() + "." + extension);
-        },
-    }),
-    // Taille max des images 5Mo
-    Limits: 5 * 1024 * 1024,
-}).single("image"); // Le fichier est envoyé dans le body avec noa/clé "image"
+    storage: storage,
+    fileFilter: fileFilter,
+}).fields([
+    { name: "image", maxCount: 1 },
+    { name: "pdf", maxCount: 1 },
+]);

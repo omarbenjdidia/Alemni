@@ -1,4 +1,13 @@
 import productModel from '../Models/product.js';
+import mongoose from 'mongoose';
+import multer from 'multer';
+
+// Configure multer for handling file uploads
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage }).fields([
+  { name: 'image', maxCount: 1 },
+  { name: 'pdf', maxCount: 1 },
+]);
 
 export async function Getproduct(req, res) {
   console.log('Getproduct function is called');
@@ -20,54 +29,66 @@ export async function Getproduct(req, res) {
 export async function Addproduct(req, res) {
   console.log('Addproduct function is called');
   try {
-    // Get Product Input
-    const {
+    // Get Product Input after Multer has processed the form data
+    const { title, description, pricing, duration } = req.body;
+
+    // Log the product data
+    console.log('Product Data:', { title, description, pricing, duration });
+
+    // Get file data from Multer
+    const image = req.files['image'] ? req.files['image'][0] : null;
+    const pdf = req.files['pdf'] ? req.files['pdf'][0] : null;
+
+    // Log the received files
+    console.log('Received Files:', req.files);
+
+    // Log file details
+    console.log('Image:', image);
+    console.log('PDF:', pdf);
+
+    // Create product in our database
+    const Product = await productModel.create({
       title,
       description,
       pricing,
-      rating,
       duration,
-      number_of_episodes,
-      image,
-    } = req.body;
+      image: image
+        ? {
+            data: image.buffer,
+            contentType: image.mimetype,
+          }
+        : null,
+      pdf: pdf
+        ? {
+            data: pdf.buffer,
+            contentType: pdf.mimetype,
+          }
+        : null,
+    });
 
-    // Checking the existence of the product
-    const existingProduct = await productModel.findOne({ title });
-
-    if (existingProduct) {
-      return res.status(403).send({
-        message: 'Product already exists!',
-      });
-    } else {
-      // Create product in our database
-      const Product = await productModel.create({
-        title,
-        description,
-        pricing,
-        rating,
-        duration,
-        number_of_episodes,
-        image,
-      });
-      return res.status(200).send({
-        message: 'Product created!',
-      });
-    }
+    return res.status(200).send({
+      message: 'Product created!',
+    });
   } catch (err) {
-    console.log(err);
+    console.log('Addproduct Error:', err); // Log other errors
     res.status(500).send({
       message: 'Internal Server Error',
     });
   }
 }
 
+
+
+
+
+
 export async function Deleteproduct(req, res) {
   console.log('Deleteproduct function is called');
   try {
-    const { title } = req.params; // Extract title from request parameters
+    const { productId } = req.params; // Extract productId from request parameters
 
     // Checking the existence of the product
-    const existingProduct = await productModel.findOneAndDelete({ title });
+    const existingProduct = await productModel.findByIdAndDelete(productId);
 
     if (!existingProduct) {
       return res.status(404).send({
@@ -89,11 +110,47 @@ export async function Deleteproduct(req, res) {
 export async function Modifyproduct(req, res) {
   console.log('Modifyproduct function is called');
   try {
-    const { title } = req.params; // Extract title from request parameters
+    const { productId } = req.params; // Extract productId from request parameters
     const updatedData = req.body; // Updated data from the request body
 
+    // Check if productId is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).send({
+        message: 'Invalid productId format',
+      });
+    }
+
+    // Get file data from Multer
+    const image = req.files['image'] ? req.files['image'][0] : null;
+    const pdf = req.files['pdf'] ? req.files['pdf'][0] : null;
+
+    // Log the received files
+    console.log('Received Files:', req.files);
+
+    // Log file details
+    console.log('Image:', image);
+    console.log('PDF:', pdf);
+
     // Update the product in the database
-    const updatedProduct = await productModel.findOneAndUpdate({ title }, updatedData, { new: true });
+    const updatedProduct = await productModel.findByIdAndUpdate(
+      productId,
+      {
+        ...updatedData,
+        image: image
+          ? {
+              data: image.buffer,
+              contentType: image.mimetype,
+            }
+          : null,
+        pdf: pdf
+          ? {
+              data: pdf.buffer,
+              contentType: pdf.mimetype,
+            }
+          : null,
+      },
+      { new: true }
+    );
 
     if (!updatedProduct) {
       return res.status(404).send({
@@ -111,4 +168,5 @@ export async function Modifyproduct(req, res) {
     });
   }
 }
+
 
