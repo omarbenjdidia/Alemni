@@ -1,7 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:io';
+import 'package:http/http.dart' as http;
 
 class CoursesCreation extends StatefulWidget {
   @override
@@ -44,15 +48,15 @@ class _CoursesCreationState extends State<CoursesCreation> {
     super.dispose();
   }
 
-  Future<void> _getImage() async {
-    final XFile? image =
-        await _imagePicker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      setState(() {
-        _image = File(image.path);
-      });
-    }
+void _getImage() async {
+  final XFile? image = await _imagePicker.pickImage(source: ImageSource.gallery);
+  if (image != null) {
+    setState(() {
+      _image = File(image.path);
+    });
   }
+}
+
 
   Future<void> _getPdf() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -67,7 +71,8 @@ class _CoursesCreationState extends State<CoursesCreation> {
     }
   }
 
-  void _validateAndProceed() {
+void _validateAndProceed() async {
+  try {
     if (_formKey.currentState!.validate()) {
       if (_image == null) {
         // Show error message if image is not selected
@@ -77,30 +82,76 @@ class _CoursesCreationState extends State<CoursesCreation> {
             duration: Duration(seconds: 2),
           ),
         );
-      } else if (_pdfFile == null) {
-        // Show error message if PDF is not selected
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Please select a course PDF.'),
-            duration: Duration(seconds: 2),
-          ),
-        );
       } else {
-        // Pass the entered values back to the previous screen
-        Navigator.pop(
-          context,
-          CourseDetails(
-            title: _titleController.text,
-            description: _descriptionController.text,
-            price: _priceController.text,
-            time: _timeController.text,
-            image: _image!,
-            pdfFile: _pdfFile,
-          ),
+        // Prepare data to be sent to the server
+        Map<String, String?> reqBody = {
+          'title': _titleController.text,
+          'description': _descriptionController.text,
+          'pricing': _priceController.text,
+          'duration': _timeController.text,
+        };
+
+        // Create a FormData object
+        var formData = http.MultipartRequest(
+          'POST',
+          Uri.parse('http://192.168.1.16:3000/product/addproduct'),
         );
+
+        // Add fields to the FormData
+        reqBody.forEach((key, value) {
+          formData.fields[key] = value!;
+        });
+
+       // Add image to the FormData
+if (_image != null) {
+  formData.files.add(await http.MultipartFile.fromPath(
+    'image',
+    _image!.path,
+    filename: 'image.jpg',
+     contentType: MediaType('image', 'jpeg'),
+  ));
+}
+
+// Add PDF to the request if available
+if (_pdfFile != null) {
+  formData.files.add(await http.MultipartFile.fromPath(
+    'pdf',
+    _pdfFile!.path,
+    filename: 'course.pdf',
+    contentType: MediaType('application', 'pdf'),
+  ));
+
+}
+
+       
+
+        // Send the request
+        var response = await formData.send();
+
+        print('Server Response Code: ${response.statusCode}');
+        print('Server Response Body: ${await response.stream.bytesToString()}');
+
+        // Handle the response accordingly
+        // ...
+
+        // Ensure that the server response is successful before proceeding
+        if (response.statusCode == 200) {
+          // Success
+          print('Request successful');
+        } else {
+          // Handle the error based on the server response
+          print('Request failed');
+        }
       }
     }
+  } catch (e, stackTrace) {
+    print('Error in _validateAndProceed: $e');
+    print('StackTrace: $stackTrace');
+    // Handle the error as needed
   }
+}
+
+
 
   @override
   Widget build(BuildContext context) {

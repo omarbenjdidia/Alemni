@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const { Schema, model } = mongoose;
 
-const productSchema = new Schema(
+const packageSchema = new Schema(
   {
     title: {
       type: String,
@@ -12,19 +12,8 @@ const productSchema = new Schema(
       type: String,
       required: true,
     },
-    pricing: {
-      type: Number,
-      required: true,
-    },
-    duration: {
-      type: String,
-      required: true,
-    },
+
     image: {
-      data: Buffer,
-      contentType: String, // Fix: Use String instead of FormData
-    },
-    pdf: {
       data: Buffer,
       contentType: String, // Fix: Use String instead of FormData
     },
@@ -34,6 +23,6 @@ const productSchema = new Schema(
   }
 );
 
-const Product = model('product', productSchema);
+const Package = model('package', packageSchema);
 
-export default Product;
+export default Package;

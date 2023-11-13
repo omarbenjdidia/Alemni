@@ -1,44 +1,49 @@
-
 GET http://localhost:3000/product/getproduct
 
 ###
 POST http://localhost:3000/product/addproduct
-Content-Type: application/json
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
 
-{
-  "title": "Web1998",
-  "description": "hallo",
-  "pricing": 5.0,
-  "rating": 4.2,
-  "duration": 1.0,
-  "number_of_episodes": 3,
-  "image": "image"
-}
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="title"
+
+immmmmmmmmm
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="description"
+
+hallo
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="pricing"
+
+5.0
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="duration"
+
+1.0
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="image"; filename="white.jpg"
+Content-Type: image/jpeg
+
+./white.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="pdf"; filename="candidaturePelerinage_1445500200544.pdf"
+Content-Type: application/pdf
+
+./candidaturePelerinage_1445500200544.pdf
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
 
 ###
-DELETE  http://localhost:3000/product/deleteproduct/Web1998
-Content-Type: application/json
-
-{
-  "title": "Web",
-  "description": "hallo",
-  "pricing": 5.0,
-  "rating": 4.2,
-  "duration": 1.0,
-  "number_of_episodes": 3,
-  "image": "image"
-}
+DELETE http://localhost:3000/product/deleteproduct/654f73159c3e507fc15118eb
 
 ###
-PUT  http://localhost:3000/product/modifyproduct/Web1998
+PUT http://localhost:3000/product/modifyproduct/654f73159c3e507fc15118eb
 Content-Type: application/json
 
 {
-  "title": "weboooooooooooooooooo",
+  "title": "iheb",
   "description": "hallo",
   "pricing": 5.0,
-  "rating": 4.2,
   "duration": 1.0,
-  "number_of_episodes": 3,
-  "image": "image"
+  //"image": "image",
+  //"pdf": "pdf"
 }
