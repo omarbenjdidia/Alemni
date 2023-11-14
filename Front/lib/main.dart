@@ -40,7 +40,7 @@ class _MyHomePageState extends State<MyHomePage> {
   List<Widget> widgets = [
     HomeScreen(),
     Courses(),
-    Search(),
+    Package(),
     Messages(),
     Profile()
   ];
