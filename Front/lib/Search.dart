@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:bson/bson.dart';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -14,6 +15,7 @@ class Package extends StatefulWidget {
 
 class PackageState extends State<Package> {
   List<CourseDetails> _courseList = [];
+  List<PackageDetails> _packageList = [];
   Set<int> selectedIndices = Set<int>();
 
   TextEditingController titleController = TextEditingController();
@@ -107,12 +109,128 @@ class PackageState extends State<Package> {
     }
   }
 
+  Future<void> getPackages() async {
+    try {
+      var response = await http.get(Uri.parse('http://192.168.139.77:3000/package/getpackage'));
+
+      if (response.statusCode == 200) {
+        print('Packages: ${response.body}');
+        var data = jsonDecode(response.body);
+
+        if (data.containsKey('packages') && data['packages'] is List) {
+          List<dynamic> packagesData = data['packages'];
+          setState(() {
+            _packageList = packagesData.map((packageData) => PackageDetails.fromJson(packageData)).toList();
+          });
+        } else {
+          print('Invalid response format. Expected a List under the key "packages".');
+        }
+      } else {
+        print('Failed to fetch packages. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
+  void navigateToPackagesList() {
+    getPackages(); // Call the function when "Packages List" is pressed
+    // Add navigation logic to the packages list screen
+    _showPackagesListDrawer();
+  }
+
+  void _showPackagesListDrawer() {
+  showModalBottomSheet(
+    context: context,
+    builder: (context) {
+      return Drawer(
+        child: ListView.builder(
+          itemCount: _packageList.length,
+          itemBuilder: (context, index) {
+            return Card(
+              margin: EdgeInsets.all(8.0),
+              child: ListTile(
+                title: Text(_packageList[index].title ?? ''),
+                subtitle: Text(_packageList[index].description ?? ''),
+                trailing: IconButton(
+  icon: Icon(Icons.delete),
+  onPressed: () {
+    showDeleteConfirmationDialog(_packageList[index].packageId);
+  },
+),
+
+              ),
+            );
+          },
+        ),
+      );
+    },
+  );
+}
+
+void showDeleteConfirmationDialog(String? packageId) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text("Delete Package"),
+        content: Text("Are you sure you want to delete this package?"),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // Close the dialog
+            },
+            child: Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () {
+              deletePackage(packageId); // Provide packageId
+              Navigator.pop(context); // Close the dialog
+            },
+            child: Text("Delete"),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+
+Future<void> deletePackage(String? packageId) async {
+  try {
+    if (packageId != null) {
+      var response = await http.delete(
+        Uri.parse('http://192.168.139.77:3000/package/deletepackage/$packageId'),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        print('Package deleted successfully.');
+        getPackages(); // Refresh the package list
+      } else {
+        print('Failed to delete package. Status code: ${response.statusCode}');
+      }
+    } else {
+      print('Package ID is null.');
+    }
+  } catch (e) {
+    print('Error: $e');
+  }
+}
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue.shade800,
         title: Text('Packages'),
+        actions: [
+          IconButton(
+            onPressed: navigateToPackagesList,
+            icon: Icon(Icons.list),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Container(
@@ -238,32 +356,7 @@ class PackageState extends State<Package> {
     );
   }
 
-  void showDeleteConfirmationDialog(String productId) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Delete Course"),
-          content: Text("Are you sure you want to delete this course?"),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context); // Close the dialog
-              },
-              child: Text("Cancel"),
-            ),
-            TextButton(
-              onPressed: () {
-                deleteCourses(productId);
-                Navigator.pop(context); // Close the dialog
-              },
-              child: Text("Delete"),
-            ),
-          ],
-        );
-      },
-    );
-  }
+ 
 }
 
 class CourseDetails {
@@ -297,3 +390,25 @@ class CourseDetails {
     );
   }
 }
+
+class PackageDetails {
+  final String? packageId; // Add this property
+  final String? title;
+  final String? description;
+
+  PackageDetails({
+    this.packageId, // Include this in the constructor
+    this.title,
+    this.description,
+  });
+
+  factory PackageDetails.fromJson(Map<String, dynamic> json) {
+    return PackageDetails(
+      packageId: json['_id'], // Assuming your package ID key is '_id'
+      title: json['title'],
+      description: json['description'],
+    );
+  }
+}
+
+
