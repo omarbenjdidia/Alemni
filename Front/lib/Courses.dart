@@ -9,10 +9,10 @@ class Courses extends StatefulWidget {
   const Courses({Key? key}) : super(key: key);
 
   @override
-  _CoursesState createState() => _CoursesState();
+  CoursesState createState() => CoursesState();
 }
 
-class _CoursesState extends State<Courses> {
+class CoursesState extends State<Courses> {
   List<CourseDetails> _courseList = [];
 
   @override
@@ -23,7 +23,7 @@ class _CoursesState extends State<Courses> {
 
   Future<void> fetchCourses() async {
     try {
-      var response = await http.get(Uri.parse('http://172.16.1.247:3000/product/getproduct/'));
+      var response = await http.get(Uri.parse('http://192.168.139.77:3000/product/getproduct/'));
 
       if (response.statusCode == 200) {
         print('Response body: ${response.body}');
@@ -45,6 +45,24 @@ class _CoursesState extends State<Courses> {
       print('Error: $e');
     }
   }
+
+   Future<void> deleteCourses(String productId) async {
+  try {
+    var response = await http.delete(Uri.parse('http://192.168.139.77:3000/product/deleteproduct/$productId'));
+
+    if (response.statusCode == 200) {
+      print('Product deleted successfully.');
+      fetchCourses();
+    } else {
+      print('Failed to delete product. Status code: ${response.statusCode}');
+    }
+  } catch (e) {
+    print('Error: $e');
+  }
+}
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -108,60 +126,86 @@ class _CoursesState extends State<Courses> {
     );
   }
 
-  Widget buildCourseCard(CourseDetails course) {
-    return Card(
-      margin: EdgeInsets.only(top: 20),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
-      ),
-      elevation: 5,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.close),
-                  onPressed: () {
-                    setState(() {
-                      _courseList.remove(course);
-                    });
-                  },
-                ),
-              ],
-            ),
-            if (course.image != null)
-              Image.file(
-                course.image!,
-                height: 100,
-                width: 100,
-                fit: BoxFit.cover,
+ Widget buildCourseCard(CourseDetails course) {
+  return Card(
+    margin: EdgeInsets.only(top: 20),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(15),
+    ),
+    elevation: 5,
+    child: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              IconButton(
+                icon: Icon(Icons.close),
+                onPressed: () {
+                  showDeleteConfirmationDialog(course.productId!);
+                },
               ),
-            SizedBox(height: 10),
-            Text(
-              'Course Details:',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+            ],
+          ),
+          if (course.image != null)
+            Image.file(
+              course.image!,
+              height: 100,
+              width: 100,
+              fit: BoxFit.cover,
             ),
-            Text('Title: ${course.title ?? ''}', style: TextStyle(fontSize: 16)),
-            Text('Description: ${course.description ?? ''}', style: TextStyle(fontSize: 16)),
-            Text('Price: ${course.price ?? 0}', style: TextStyle(fontSize: 16)),
-            Text('Estimated Course Time: ${course.time ?? 0} hours', style: TextStyle(fontSize: 16)),
-            if (course.pdfFile?.path?.isNotEmpty == true)
-              Text('Selected PDF: ${course.pdfFile!.path}', style: TextStyle(fontSize: 16)),
-          ],
-        ),
+          SizedBox(height: 10),
+          Text(
+            'Course Details:',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text('Title: ${course.title ?? ''}', style: TextStyle(fontSize: 16)),
+          Text('Description: ${course.description ?? ''}', style: TextStyle(fontSize: 16)),
+          Text('Price: ${course.price ?? 0}', style: TextStyle(fontSize: 16)),
+          Text('Estimated Course Time: ${course.time ?? 0} hours', style: TextStyle(fontSize: 16)),
+          if (course.pdfFile?.path?.isNotEmpty == true)
+            Text('Selected PDF: ${course.pdfFile!.path}', style: TextStyle(fontSize: 16)),
+        ],
       ),
-    );
-  }
+    ),
+  );
 }
 
+void showDeleteConfirmationDialog(String productId) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text("Delete Course"),
+        content: Text("Are you sure you want to delete this course?"),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // Close the dialog
+            },
+            child: Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () {
+              deleteCourses(productId);
+              Navigator.pop(context); // Close the dialog
+            },
+            child: Text("Delete"),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+}
 class CourseDetails {
+  final String? productId; // Add this property
   final String? title;
   final String? description;
   final double? price;
@@ -170,6 +214,7 @@ class CourseDetails {
   final File? pdfFile;
 
   CourseDetails({
+    this.productId, // Include this in the constructor
     this.title,
     this.description,
     this.price,
@@ -178,8 +223,9 @@ class CourseDetails {
     this.pdfFile,
   });
 
-  factory CourseDetails.fromJson(Map<String, dynamic> json) {
+    factory CourseDetails.fromJson(Map<String, dynamic> json) {
     return CourseDetails(
+      productId: json['_id'], // Assuming your product ID key is '_id'
       title: json['title'],
       description: json['description'],
       price: json['pricing'] is int ? json['pricing'].toDouble() : double.tryParse(json['pricing']),
@@ -189,3 +235,6 @@ class CourseDetails {
     );
   }
 }
+
+  
+

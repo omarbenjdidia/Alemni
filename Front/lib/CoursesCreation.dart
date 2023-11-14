@@ -94,7 +94,7 @@ void _validateAndProceed() async {
         // Create a FormData object
         var formData = http.MultipartRequest(
           'POST',
-          Uri.parse('http://172.16.1.247:3000/product/addproduct'),
+          Uri.parse('http://192.168.139.77:3000/product/addproduct'),
         );
 
         // Add fields to the FormData
@@ -319,7 +319,7 @@ if (_pdfFile != null) {
                   primary: Colors.grey.shade400,
                 ),
                 child: Text(
-                  'Cancel',
+                  'Next',
                   style: TextStyle(fontSize: fontSize),
                 ),
               ),
@@ -335,7 +335,7 @@ if (_pdfFile != null) {
                   primary: Colors.blue.shade800,
                 ),
                 child: Text(
-                  'Next',
+                  'Add',
                   style: TextStyle(fontSize: fontSize),
                 ),
               ),
