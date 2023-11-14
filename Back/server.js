@@ -14,7 +14,7 @@ const app = express();
 
 const database = "aalmni";
 const port = process.env.PORT || 3000;
-const hostname = '192.168.1.16';
+const hostname = '172.16.1.247';
 
 import * as dotenv from 'dotenv';
 dotenv.config();

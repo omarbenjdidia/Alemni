@@ -1,5 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'CoursesCreation.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class Courses extends StatefulWidget {
   const Courses({Key? key}) : super(key: key);
@@ -10,6 +14,37 @@ class Courses extends StatefulWidget {
 
 class _CoursesState extends State<Courses> {
   List<CourseDetails> _courseList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchCourses();
+  }
+
+  Future<void> fetchCourses() async {
+    try {
+      var response = await http.get(Uri.parse('http://172.16.1.247:3000/product/getproduct/'));
+
+      if (response.statusCode == 200) {
+        print('Response body: ${response.body}');
+
+        var data = jsonDecode(response.body);
+
+        if (data.containsKey('products') && data['products'] is List) {
+          List<dynamic> coursesData = data['products'];
+          setState(() {
+            _courseList = coursesData.map((courseData) => CourseDetails.fromJson(courseData)).toList();
+          });
+        } else {
+          print('Invalid response format. Expected a List under the key "products".');
+        }
+      } else {
+        print('Failed to fetch courses. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,8 +92,6 @@ class _CoursesState extends State<Courses> {
                   ),
                 ),
               ),
-              
-              
               SizedBox(height: 20),
               ListView.builder(
                 shrinkWrap: true,
@@ -102,7 +135,7 @@ class _CoursesState extends State<Courses> {
             ),
             if (course.image != null)
               Image.file(
-                course.image,
+                course.image!,
                 height: 100,
                 width: 100,
                 fit: BoxFit.cover,
@@ -115,12 +148,12 @@ class _CoursesState extends State<Courses> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            Text('Title: ${course.title}', style: TextStyle(fontSize: 16)),
-            Text('Description: ${course.description}', style: TextStyle(fontSize: 16)),
-            Text('Price: ${course.price}', style: TextStyle(fontSize: 16)),
-            Text('Estimated Course Time: ${course.time} hours', style: TextStyle(fontSize: 16)),
-            if (course.pdfFile.path.isNotEmpty)
-              Text('Selected PDF: ${course.pdfFile.path}', style: TextStyle(fontSize: 16)),
+            Text('Title: ${course.title ?? ''}', style: TextStyle(fontSize: 16)),
+            Text('Description: ${course.description ?? ''}', style: TextStyle(fontSize: 16)),
+            Text('Price: ${course.price ?? 0}', style: TextStyle(fontSize: 16)),
+            Text('Estimated Course Time: ${course.time ?? 0} hours', style: TextStyle(fontSize: 16)),
+            if (course.pdfFile?.path?.isNotEmpty == true)
+              Text('Selected PDF: ${course.pdfFile!.path}', style: TextStyle(fontSize: 16)),
           ],
         ),
       ),
@@ -128,3 +161,31 @@ class _CoursesState extends State<Courses> {
   }
 }
 
+class CourseDetails {
+  final String? title;
+  final String? description;
+  final double? price;
+  final int? time;
+  final File? image;
+  final File? pdfFile;
+
+  CourseDetails({
+    this.title,
+    this.description,
+    this.price,
+    this.time,
+    this.image,
+    this.pdfFile,
+  });
+
+  factory CourseDetails.fromJson(Map<String, dynamic> json) {
+    return CourseDetails(
+      title: json['title'],
+      description: json['description'],
+      price: json['pricing'] is int ? json['pricing'].toDouble() : double.tryParse(json['pricing']),
+      time: json['duration'] is int ? json['duration'] : int.tryParse(json['duration']),
+      image: json['image'] != null ? File(json['image']['contentType']) : null,
+      pdfFile: json['pdfFile'] != null ? File(json['pdfFile']['contentType']) : null,
+    );
+  }
+}

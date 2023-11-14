@@ -94,7 +94,7 @@ void _validateAndProceed() async {
         // Create a FormData object
         var formData = http.MultipartRequest(
           'POST',
-          Uri.parse('http://192.168.1.16:3000/product/addproduct'),
+          Uri.parse('http://172.16.1.247:3000/product/addproduct'),
         );
 
         // Add fields to the FormData
