@@ -13,10 +13,12 @@ const packageSchema = new Schema(
       required: true,
     },
 
-    image: {
-      data: Buffer,
-      contentType: String, // Fix: Use String instead of FormData
-    },
+    products: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Product', // Reference to the Product model     
+        },
+    ],
   },
   {
     timestamps: true,

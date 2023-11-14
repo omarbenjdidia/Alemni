@@ -1,0 +1,19 @@
+###
+POST http://192.168.139.77:3000/package/addpackage
+Content-Type: application/json
+
+{
+    "title": "pack",
+    "description": "tt",
+    "products": ["65537856f18eb6b40221664b", "6553785af18eb6b40221664d"]
+}
+
+###
+DELETE http://192.168.139.77:3000/package/deletepackage/655377f8f18eb6b402216649
+Content-Type: application/json
+
+###
+GET http://192.168.139.77:3000/package/getpackage
+Content-Type: application/json
+
+

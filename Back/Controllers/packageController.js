@@ -3,9 +3,6 @@ import multer from 'multer';
 
 // Configure multer for handling file uploads
 const storage = multer.memoryStorage();
-const upload = multer({ storage: storage }).fields([
-  { name: 'image', maxCount: 1 },
-]);
 
 export async function Getpackage(req, res) {
   console.log('Getpackage function is called');
@@ -28,30 +25,23 @@ export async function Addpackage(req, res) {
   console.log('Addpackage function is called');
   try {
     // Get Product Input after Multer has processed the form data
-    const { title, description } = req.body;
+    const { title, description, products } = req.body;
 
-    // Log the product data
-    console.log('Package Data:', { title, description });
+    // Log the package data
+    console.log('Package Data:', { title, description, products });
 
-    // Get file data from Multer
-    const image = req.files['image'] ? req.files['image'][0] : null;
 
     // Log the received files
     console.log('Received Files:', req.files);
 
     // Log file details
-    console.log('Image:', image);
 
-    // Create product in our database
-    const Package = await productModel.create({
+    // Create package in our database
+    const packageId = await productModel.create({
       title,
       description,
-      image: image
-        ? {
-            data: image.buffer,
-            contentType: image.mimetype,
-          }
-        : null,
+
+      products: products, // Assuming products is an array of product IDs
     });
 
     return res.status(200).send({
@@ -91,7 +81,3 @@ export async function Deletepackage(req, res) {
     });
   }
 }
-
-
-
-
